@@ -3,7 +3,7 @@ import json
 from django.views import View
 from django.http.response import JsonResponse
 
-from netbox_wiki.wiki_updater import WikiPageUpdater
+from netbox_wiki.updater.wiki_updater import WikiPageUpdater
 
 
 class NetboxVikiAPIView(View):
