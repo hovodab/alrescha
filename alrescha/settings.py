@@ -118,10 +118,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Confluence credentials, for access by REST API(encapsulated in atlassian-python-api).
+
+
+# Confluence settings and credentials, for access by REST API(encapsulated in atlassian-python-api).
 
 CONFLUENCE_CREDENTIALS = {
     'url': 'http://localhost:8090',
     'username': 'admin',
     'password': 'admin'
 }
+
+SPACE_KEY = 'SNOW'

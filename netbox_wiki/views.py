@@ -22,7 +22,7 @@ class NetboxVikiAPIView(View):
                 'slug': 'office-1',
                 'status': {
                     'value': 1,
-                    'label': 'Active'
+                    'label': 'Active15'
                 },
                 'region': None,
                 'tenant': None,
@@ -40,7 +40,7 @@ class NetboxVikiAPIView(View):
                 'comments': 'Some comment for testing purposes.',
                 'tags': ['testing', 'new'],
                 'custom_fields': {
-                    'purpose': 'This is site for testing purposes.'
+                    'purpose': 'Cepheus 15.'
                 },
                 'created': '2019-12-11',
                 'last_updated': '2019-12-12T06:28:14.608353Z'

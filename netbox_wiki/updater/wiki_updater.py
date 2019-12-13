@@ -17,7 +17,21 @@ class WikiPageUpdater(object):
 
     def __init__(self, data):
         self.data = data
+        self.page_title = self.generate_page_name(data['model'])
         self.confluence = ConfluenceAdapter()
+
+    @staticmethod
+    def generate_page_name(model_name):
+        """
+        Generate page name on the Wiki.
+
+        :type model_name: str
+        :param model_name: Model name which was changed.
+
+        :rtype: str
+        :returns: Name of the page that should correspond to the chagned model on the NetBox.
+        """
+        return "partials-{}".format(model_name)
 
     @staticmethod
     def create_field_chain(field_map, data):
@@ -60,14 +74,14 @@ class WikiPageUpdater(object):
         # (Wikis old content) -> LinkedField1 -> LinkedField2 -> ... -> (Wikis new content).
         field_chain = self.get_field_chain()
 
-        page_content = self.confluence.get_page_content()
+        page_id, page_content = self.confluence.get_page_content(self.page_title)
 
         # Provide page content to each field so each will update the content with it specific way.
         for field in field_chain:
             page_content = self.confluence.update_content_for_field(page_content, field)
 
         # After all fields are done with the changes update page content.
-        self.confluence.update_page_content(page_content)
+        self.confluence.update_page_content(page_id, self.page_title, page_content)
 
     def get_field_chain(self):
         """
