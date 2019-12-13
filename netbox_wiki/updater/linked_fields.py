@@ -36,7 +36,10 @@ class TextLinkedField(AbstractLinkedField):
 
     def provide_value(self):
         """
-        TODO
+        Provide value for the field.
+
+        :rtype: str
+        :returns: Value of the field.
         """
         return self.value
 
@@ -48,6 +51,9 @@ class StatusLinkedField(AbstractLinkedField):
 
     def provide_value(self):
         """
-        TODO
+        Provide value for the field
+
+        :rtype: str
+        :returns: Status of the site.
         """
         return self.value['label']

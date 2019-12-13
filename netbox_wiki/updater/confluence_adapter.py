@@ -3,6 +3,7 @@ from xml.dom import minidom
 from lxml import etree as ETree
 from atlassian import Confluence
 from netbox_wiki.updater.exceptioins import WikiUpdateException
+from django.conf import settings
 
 
 class ConfluenceAdapter(object):
@@ -14,12 +15,10 @@ class ConfluenceAdapter(object):
     SPACE_KEY = "SNOW"
 
     def __init__(self):
-        # TODO: Move credentials in specific file settings.py or .env.
-        self.confluence = Confluence(url='http://localhost:8090',
-                                     username='admin',
-                                     password='admin')
+        self.confluence = Confluence(url=settings.CONFLUENCE_CREDENTIALS['url'],
+                                     username=settings.CONFLUENCE_CREDENTIALS['username'],
+                                     password=settings.CONFLUENCE_CREDENTIALS['password'])
         self.page_id = None
-        self.page_title = None
 
     def get_page_content(self):
         """
@@ -34,16 +33,14 @@ class ConfluenceAdapter(object):
                                                  expand="body.storage,version")
         if not data:
             # No such page exist. Then create such page.
-            # TODO: Handle case when page failed to create.
             data = self.create_page()
 
         # TODO: Change the way this works. May be get_page_content should be performed on init.
         self.page_id = data['id']
-        self.page_title = data['title']
 
         try:
             raw_xml = data['body']['storage']['value']
-        except ValueError:
+        except KeyError:
             raise WikiUpdateException("Can't get partial-devices page content.")
 
         # return ETree.fromstring(body, ETree.XMLParser(recover=True))
@@ -61,11 +58,14 @@ class ConfluenceAdapter(object):
         """
         Create new page.+
 
+        :raises: WikiUpdateException
+
         :rtype: dict
         :return: Data of newly created page.
         """
         data = self.confluence.create_page(self.SPACE_KEY, self.PAGE_TITLE, body="")
-        # TODO: Check whether page was successfully created or not.
+        if not data or 'id' not in data:
+            raise WikiUpdateException("Page `{}` could not be created. Response data: {}".format(self.PAGE_TITLE, data))
         return data
 
     def update_page_content(self, body):
@@ -80,8 +80,9 @@ class ConfluenceAdapter(object):
         """
         # TODO: May be there is a better way to do this? May be use something else instead of `minidom`.
         raw_xml = body.toxml()[351:-12]
-        data = self.confluence.update_existing_page(self.page_id, self.page_title, raw_xml)
-        # TODO: Check whether data is successfully updated or not.
+        data = self.confluence.update_existing_page(self.page_id, self.PAGE_TITLE, raw_xml)
+        if not data or 'id' not in data:
+            raise WikiUpdateException("Page `{}` could not be updated. Response data: {}".format(self.PAGE_TITLE, data))
         return data
 
     @staticmethod

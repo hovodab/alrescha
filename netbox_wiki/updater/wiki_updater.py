@@ -40,7 +40,7 @@ class WikiPageUpdater(object):
         for field, field_class in field_map.items():
             try:
                 field_object = field_class(field, data[field])
-            except ValueError:
+            except KeyError:
                 raise WikiUpdateException("Field {} is configured in updater but does"
                                           " not present in webhook payload.".format(field))
             field_chain.append(field_object)
@@ -60,12 +60,12 @@ class WikiPageUpdater(object):
         # (Wikis old content) -> LinkedField1 -> LinkedField2 -> ... -> (Wikis new content).
         field_chain = self.get_field_chain()
 
-        # TODO: Get page content.
         page_content = self.confluence.get_page_content()
 
         # Provide page content to each field so each will update the content with it specific way.
         for field in field_chain:
             page_content = self.confluence.update_content_for_field(page_content, field)
+
         # After all fields are done with the changes update page content.
         self.confluence.update_page_content(page_content)
 
@@ -78,19 +78,11 @@ class WikiPageUpdater(object):
         :rtype: list
         :returns: List of fields that should update the data.
         """
-        # TODO: Is there a better way to check ValueError more dynamic, for example if it is possible to get key name?
         try:
             field_chain = self.create_field_chain(self.FIELD_MAP, self.data['data'])
-        except ValueError:
-            raise WikiUpdateException("Wrong formatted request body:"
-                                      " `data` is not present in webhook payload.")
-
-        try:
             custom_field_chain = self.create_field_chain(self.CUSTOM_FIELD_MAP, self.data['data']['custom_fields'])
-        except ValueError:
+        except KeyError as exception:
             raise WikiUpdateException("Wrong formatted request body:"
-                                      " `custom_fields` is not present in webhook payload.")
+                                      " `{}` is not present in webhook payload.".format(exception.args[0]))
 
         return field_chain + custom_field_chain
-
-
