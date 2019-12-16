@@ -1,0 +1,17 @@
+{% autoescape off %}
+    <ac:structured-macro xmlns:ac="http://atlassian.com/content"
+        ac:name="multiexcerpt" ac:schema-version="1" ac:macro-id="{{ macro_id }}"
+    >
+        <ac:parameter ac:name="MultiExcerptName">
+            {{ field_name }}
+        </ac:parameter>
+        <ac:parameter ac:name="atlassian-macro-output-type">
+            INLINE
+        </ac:parameter>
+        <ac:rich-text-body>
+            <p>
+                {{ field_value }}
+            </p>
+        </ac:rich-text-body>
+    </ac:structured-macro>
+{% endautoescape %}

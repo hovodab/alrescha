@@ -1,0 +1,10 @@
+{% autoescape off %}<?xml version="1.0"?><!DOCTYPE xml SYSTEM "xhtml.ent" []>
+    <xml xmlns:atlassian-content="http://atlassian.com/content"
+        xmlns:ac="http://atlassian.com/content"
+        xmlns:ri="http://atlassian.com/resource/identifier"
+        xmlns:atlassian-template="http://atlassian.com/template"
+        xmlns:at="http://atlassian.com/template" xmlns="http://www.w3.org/1999/xhtml"
+    >
+        {{ content }}
+    </xml>
+{% endautoescape %}

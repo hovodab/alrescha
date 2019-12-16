@@ -3,6 +3,7 @@ import uuid
 from lxml import etree
 from atlassian import Confluence
 from django_netbox_confluence.updater.exceptioins import WikiUpdateException
+from django.template.loader import render_to_string
 from django.conf import settings
 
 
@@ -48,14 +49,9 @@ class ConfluenceAdapter(object):
         except KeyError:
             raise WikiUpdateException("Can't get partial-devices page content.")
 
-        # TODO: Move XML to template xml files.
-        body_xml = ('<?xml version="1.0"?><!DOCTYPE xml SYSTEM "xhtml.ent" []>'
-                       '<xml xmlns:atlassian-content="http://atlassian.com/content"'
-                       ' xmlns:ac="http://atlassian.com/content"'
-                       ' xmlns:ri="http://atlassian.com/resource/identifier"'
-                       ' xmlns:atlassian-template="http://atlassian.com/template"'
-                       ' xmlns:at="http://atlassian.com/template" xmlns="http://www.w3.org/1999/xhtml">'
-                       '{}</xml>'.format(content_xml))
+        body_xml = render_to_string('wrapper.xml', {
+            'content': content_xml
+        })
         return data['id'], etree.fromstring(body_xml)
 
     def create_page(self, page_title):
@@ -112,7 +108,8 @@ class ConfluenceAdapter(object):
         :rtype: lxml.etree._Element
         :returns: Element data.
         """
-        return element.xpath('//ac:structured-macro/ac:parameter[@ac:name="MultiExcerptName" and text()="{}"]'
+        return element.xpath('//ac:structured-macro/ac:parameter'
+                             '[@ac:name="MultiExcerptName" and translate(normalize-space(text()), " ", "")="{}"]'
                                 '/following-sibling::ac:rich-text-body/*[local-name()="p"]'.format(field.name),
                              namespaces=cls.NAMESPACES)
 
@@ -133,15 +130,12 @@ class ConfluenceAdapter(object):
         field_elements = cls.get_field_element(page_content, field)
         if not field_elements:
             macro_id = uuid.uuid4()
-            # TODO: Move XML to template xml files.
-            element = etree.fromstring('<ac:structured-macro xmlns:ac="http://atlassian.com/content" '
-                                           'ac:name="multiexcerpt" ac:schema-version="1" ac:macro-id="{macro_id}">'
-                                           '<ac:parameter ac:name="MultiExcerptName">{field_name}</ac:parameter>'
-                                           '<ac:parameter ac:name="atlassian-macro-output-type">INLINE</ac:parameter>'
-                                           '<ac:rich-text-body><p>{field_value}</p></ac:rich-text-body>'
-                                           '</ac:structured-macro>'.format(macro_id=macro_id,
-                                                                           field_name=field.name,
-                                                                           field_value=field.provide_value()))
+            data = render_to_string('multiexcerpt.xml', {
+                "macro_id": macro_id,
+                "field_name": field.name,
+                "field_value": field.provide_value()
+            })
+            element = etree.fromstring(data)
             page_content.insert(-1, element)
 
         for field_element in field_elements:

@@ -22,7 +22,7 @@ class NetboxVikiAPIView(View):
                 'slug': 'office-1',
                 'status': {
                     'value': 1,
-                    'label': 'Active15'
+                    'label': 'Active'
                 },
                 'region': None,
                 'tenant': None,
@@ -40,7 +40,7 @@ class NetboxVikiAPIView(View):
                 'comments': 'Some comment for testing purposes.',
                 'tags': ['testing', 'new'],
                 'custom_fields': {
-                    'purpose': 'Cepheus 15.'
+                    'purpose': 'Cepheus.'
                 },
                 'created': '2019-12-11',
                 'last_updated': '2019-12-12T06:28:14.608353Z'
@@ -55,7 +55,6 @@ class ModelChangeTriggerView(NetboxVikiAPIView):
         data = self.serialize_data(request)
 
         # TODO: Handle in queue.
-        # TODO: Update appropriate page with changed fields.
         WikiPageUpdater(data).update()
 
         return JsonResponse({
