@@ -1,7 +1,19 @@
 from abc import ABCMeta, abstractmethod
 
 
-class AbstractLinkedField(object, metaclass=ABCMeta):
+class ABCLinkedFieldMeta(ABCMeta):
+    linked_field_classes = dict()
+
+    def __new__(mcs, name, parents, configs):
+        new_class = super().__new__(mcs, name, parents, configs)
+        # Ignore Abstract class, use only its derivatives.
+        if object not in parents:
+            assert name not in mcs.linked_field_classes
+            mcs.linked_field_classes[name] = new_class
+        return new_class
+
+
+class AbstractLinkedField(object, metaclass=ABCLinkedFieldMeta):
     """
     Represents base field that should be linked with Confluence Wiki and should be updated when is changed on NetBox.
     """
@@ -28,6 +40,10 @@ class AbstractLinkedField(object, metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @property
+    def verbose_name(self):
+        return self.__class__.name
+
 
 class TextLinkedField(AbstractLinkedField):
     """
@@ -48,6 +64,7 @@ class StatusLinkedField(AbstractLinkedField):
     """
     Represents text field which should be updated on Wiki.
     """
+    verbose_name = "Drop down field."
 
     def provide_value(self):
         """
