@@ -14,8 +14,38 @@ For that purpose it is needed to create webhook on the NetBox admin.
 For a complete list of requirements, see `requirements.txt`. The code is available [on GitHub](https://github.com/hovodab/alrescha).
 
 
-# Installation
+## Installation
 
 ```bash
 $ pip install -r requirements.txt
+```
+
+## Configuration
+
+Add app to INSTALLED_APPS list in the end of your Django settings file.
+```python
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    ...
+    'django_netbox_confluence',
+]
+```
+
+Add urls configuration in your urls.py.
+```python
+urlpatterns = [
+    path('netbox-wiki-api/', include('django_netbox_confluence.urls')),
+    ...
+]
+```
+
+Add confluence credentials settings and space key where the data will be stored variables in your Django settings file.
+```python
+CONFLUENCE_CREDENTIALS = {
+    'url': 'http://localhost:8090',
+    'username': 'admin',
+    'password': 'admin'
+}
+
+SPACE_KEY = 'NETBOX'
 ```
