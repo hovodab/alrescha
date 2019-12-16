@@ -1,6 +1,6 @@
-from netbox_wiki.updater import linked_fields
-from netbox_wiki.updater.confluence_adapter import ConfluenceAdapter
-from netbox_wiki.updater.exceptioins import WikiUpdateException
+from django_netbox_confluence.updater import linked_fields
+from django_netbox_confluence.updater.confluence_adapter import ConfluenceAdapter
+from django_netbox_confluence.updater.exceptioins import WikiUpdateException
 
 
 class WikiPageUpdater(object):

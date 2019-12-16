@@ -14,11 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-
-from netbox_wiki.views import SiteChangeTriggerView
+from django.urls import include, path
 
 urlpatterns = [
+    path('netbox-wiki-api/', include('django_netbox_confluence.urls')),
     path('admin/', admin.site.urls),
-    path('site_change_trigger/', SiteChangeTriggerView.as_view()),
 ]

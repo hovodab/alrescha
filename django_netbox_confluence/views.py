@@ -3,7 +3,7 @@ import json
 from django.views import View
 from django.http.response import JsonResponse
 
-from netbox_wiki.updater.wiki_updater import WikiPageUpdater
+from django_netbox_confluence.updater.wiki_updater import WikiPageUpdater
 
 
 class NetboxVikiAPIView(View):
@@ -49,7 +49,7 @@ class NetboxVikiAPIView(View):
         return json.loads(request.body)
 
 
-class SiteChangeTriggerView(NetboxVikiAPIView):
+class ModelChangeTriggerView(NetboxVikiAPIView):
     def post(self, request):
         # Take data form Netbox webhook payload.
         data = self.serialize_data(request)

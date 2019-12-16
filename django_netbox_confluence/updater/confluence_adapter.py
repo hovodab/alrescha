@@ -2,7 +2,7 @@ import uuid
 
 from lxml import etree
 from atlassian import Confluence
-from netbox_wiki.updater.exceptioins import WikiUpdateException
+from django_netbox_confluence.updater.exceptioins import WikiUpdateException
 from django.conf import settings
 
 
