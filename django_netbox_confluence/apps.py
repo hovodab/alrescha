@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class NetboxWikiConfig(AppConfig):
+class NetBoxWikiConfig(AppConfig):
     name = 'django_netbox_confluence'

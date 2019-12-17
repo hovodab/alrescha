@@ -1,3 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
+from django_netbox_confluence.models import NetBoxConfluenceField
+
+
+class NetBoxConfluenceFieldAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(NetBoxConfluenceField, NetBoxConfluenceFieldAdmin)

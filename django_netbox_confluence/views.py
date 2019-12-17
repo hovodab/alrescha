@@ -3,59 +3,53 @@ import json
 from django.views import View
 from django.http.response import JsonResponse
 
-from django_netbox_confluence.updater.wiki_updater import WikiPageUpdater
+from django_netbox_confluence.updater.wiki_updater import WikiPageUpdater, WikiUpdateException
 
 
-class NetboxVikiAPIView(View):
+class NetBoxVikiAPIView(View):
+    """
+    Base for all NetBox webhook handlers.
+    """
     http_method_names = ['post']
 
     def serialize_data(self, request):
-        # return {
-        #     'event': 'updated',
-        #     'timestamp': '2019-12-12 06:28:14.697248',
-        #     'model': 'site',
-        #     'username': 'hovhannes',
-        #     'request_id': '05fd06f4-8825-4bb4-acb4-119f1ec7da04',
-        #     'data': {
-        #         'id': 1,
-        #         'name': 'Office 1',
-        #         'slug': 'office-1',
-        #         'status': {
-        #             'value': 1,
-        #             'label': 'Active'
-        #         },
-        #         'region': None,
-        #         'tenant': None,
-        #         'facility': '',
-        #         'asn': 554,
-        #         'time_zone': 'Asia/Yerevan',
-        #         'description': 'Something',
-        #         'physical_address': '40.1753932, 44.510232599999995',
-        #         'shipping_address': 'Degheyan st',
-        #         'latitude': '40.175393',
-        #         'longitude': '44.510232',
-        #         'contact_name': 'Hovhannes',
-        #         'contact_phone': '1214514361',
-        #         'contact_email': 'asdfj@dflskjg.com',
-        #         'comments': 'Some comment for testing purposes.',
-        #         'tags': ['testing', 'new'],
-        #         'custom_fields': {
-        #             'purpose': 'Cepheus.'
-        #         },
-        #         'created': '2019-12-11',
-        #         'last_updated': '2019-12-12T06:28:14.608353Z'
-        #     }
-        # }
+        """
+        Get data serialized as dict.
+        """
         return json.loads(request.body)
 
+    def validate_data(self, data):
+        """
+        Validating whether webhook body is formed right.
+        """
+        assert "model" in data, "No `model` in webhook payload."
+        assert type(data["model"]) is str, "`model` should be string, got {}".format(type(data["model"]))
 
-class ModelChangeTriggerView(NetboxVikiAPIView):
+        assert "data" in data, "No `data` in webhook payload."
+        assert type(data["data"]) is dict, "`data` should be dict, got {}".format(type(data["data"]))
+
+        assert "custom_fields" in data["data"], "No `cusom_fields` in webhook payload data."
+        assert type(data["data"]["custom_fields"]) is dict, ("`custom_fields` should be dict, got {}"
+                                                             .format(type(data["data"]["custom_fields"])))
+
+
+class ModelChangeTriggerView(NetBoxVikiAPIView):
+    """
+    Webhook handler.
+    """
     def post(self, request):
-        # Take data form Netbox webhook payload.
+        # Take data form NetBox webhook payload.
         data = self.serialize_data(request)
-        print(data)
+        self.validate_data(data)
+
         # TODO: Handle in queue.
-        WikiPageUpdater(data).update()
+        try:
+            WikiPageUpdater(data).update()
+        except WikiPageUpdater as e:
+            return JsonResponse({
+                "message": "Update failed.",
+                "error": e,
+            }, status=400)
 
         return JsonResponse({
             "message": "Successfully updated.",

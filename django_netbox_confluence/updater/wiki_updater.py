@@ -1,23 +1,18 @@
 from django_netbox_confluence.updater import linked_fields
 from django_netbox_confluence.updater.confluence_adapter import ConfluenceAdapter
 from django_netbox_confluence.updater.exceptioins import WikiUpdateException
+from django_netbox_confluence.models import NetBoxConfluenceField
 
 
 class WikiPageUpdater(object):
     """
     Updates Wiki page when NetBox site page is updated.
     """
-    FIELD_MAP = {
-        "status": linked_fields.StatusLinkedField,
-        "description": linked_fields.TextLinkedField,
-    }
-    CUSTOM_FIELD_MAP = {
-        "purpose": linked_fields.TextLinkedField,
-    }
 
     def __init__(self, data):
+        self.model_name = data['model']
         self.data = data
-        self.page_title = self.generate_page_name(data['model'])
+        self.page_title = self.generate_page_name(self.model_name)
         self.confluence = ConfluenceAdapter()
 
     @staticmethod
@@ -29,20 +24,13 @@ class WikiPageUpdater(object):
         :param model_name: Model name which was changed.
 
         :rtype: str
-        :returns: Name of the page that should correspond to the chagned model on the NetBox.
+        :returns: Name of the page that should correspond to the changed model on the NetBox.
         """
         return "partials-{}".format(model_name)
 
-    @staticmethod
-    def create_field_chain(field_map, data):
+    def get_field_chain(self):
         """
-        Create fields chain.
-
-        :type field_map: dict
-        :param field_map: Map between field name and its corresponding LinkedField.
-
-        :type data: dict
-        :param data: Data that needs to be updated on the Wiki page.
+        Create fields chain. List of AbstractLinkedField derivatives.
 
         :raises: WikiUpdateException
 
@@ -50,20 +38,31 @@ class WikiPageUpdater(object):
         :returns: List of LinkedFields.
         """
         field_chain = list()
+        # Get all fields that are configured by Django admin panel.
+        fields = NetBoxConfluenceField.objects.filter(model_name=self.model_name)
 
-        for field, field_class in field_map.items():
+        for field in fields:
+            # Get field value form webhook request payload.
             try:
-                field_object = field_class(field, data[field])
+                if field.is_custom_field:
+                    new_value = self.data['data']['custom_fields'][field.field_name]
+                else:
+                    new_value = self.data['data'][field.field_name]
             except KeyError:
-                raise WikiUpdateException("Field {} is configured in updater but does"
-                                          " not present in webhook payload.".format(field))
+                raise WikiUpdateException("Field {} is configured in updater but does not present in webhook payload."
+                                          " May be `Is Custom Field` checkbox wrong state.".format(field))
+            # Create AbstractLinkedField derivative class object.
+            field_object = field.field_type_class(field.field_name, new_value, is_custom=field.is_custom_field)
+            # Append to chain list.
             field_chain.append(field_object)
 
         return field_chain
 
     def update(self):
         """
-        Update the data on the Wiki page.
+        Update the data on the Wiki page to correspond the date from webhook.
+
+        :raises: WikiUpdateException
 
         :rtype: void
         :returns: void
@@ -82,21 +81,3 @@ class WikiPageUpdater(object):
 
         # After all fields are done with the changes update page content.
         self.confluence.update_page_content(page_id, self.page_title, page_content)
-
-    def get_field_chain(self):
-        """
-        Get field chain for fields that should be updated on the Wiki.
-
-        :raises: WikiUpdateException
-
-        :rtype: list
-        :returns: List of fields that should update the data.
-        """
-        try:
-            field_chain = self.create_field_chain(self.FIELD_MAP, self.data['data'])
-            custom_field_chain = self.create_field_chain(self.CUSTOM_FIELD_MAP, self.data['data']['custom_fields'])
-        except KeyError as exception:
-            raise WikiUpdateException("Wrong formatted request body:"
-                                      " `{}` is not present in webhook payload.".format(exception.args[0]))
-
-        return field_chain + custom_field_chain

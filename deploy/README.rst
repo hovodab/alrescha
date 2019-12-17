@@ -2,14 +2,14 @@
 django_netbox_confluence
 ========================
 
-Django-Netbox-Confluence is a Django app to connect Netbox and Confluence wiki. Define .
+Django-NetBox-Confluence is a Django app to connect NetBox and Confluence wiki. Define .
 
 Detailed documentation is in the "docs" directory.
 
 Quick start
 -----------
 
-1. Add "Django-Netbox-Confluence" to your INSTALLED_APPS setting like this::
+1. Add "Django-NetBox-Confluence" to your INSTALLED_APPS setting like this::
 
    INSTALLED_APPS = [
        ...
@@ -20,7 +20,7 @@ Quick start
 
    path('netbox-wiki-api/', include('django_netbox_confluence.urls')),
 
-3. Run `python manage.py migrate` to create the Django-Netbox-Confluence models.
+3. Run `python manage.py migrate` to create the Django-NetBox-Confluence models.
 
 4. Start the development server and visit http://127.0.0.1:8000/admin/
    to create a configuration (you'll need the Admin app enabled).

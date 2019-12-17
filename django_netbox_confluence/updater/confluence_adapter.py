@@ -84,6 +84,8 @@ class ConfluenceAdapter(object):
         :type body: lxml.etree._Element
         :param body: Page content data.
 
+        :raises: WikiUpdateException
+
         :rtype: dict
         :returns: Data of newly updated page.
         """
@@ -129,6 +131,7 @@ class ConfluenceAdapter(object):
         """
         field_elements = cls.get_field_element(page_content, field)
         if not field_elements:
+            # If element does not exist then create it.
             macro_id = uuid.uuid4()
             data = render_to_string('multiexcerpt.xml', {
                 "macro_id": macro_id,
@@ -137,6 +140,8 @@ class ConfluenceAdapter(object):
             })
             element = etree.fromstring(data)
             page_content.insert(-1, element)
+            # Can leave without this return, but `Explicit is better than implicit.` (C) Python Zen.
+            return page_content
 
         for field_element in field_elements:
             field_element.text = field.provide_value()
