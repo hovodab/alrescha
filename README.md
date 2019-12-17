@@ -17,8 +17,14 @@ For a complete list of requirements, see `requirements.txt`. The code is availab
 ## Installation
 
 ```bash
-$ pip install -r requirements.txt
+$ pip install django-netbox-confluence
 ```
+
+- You should have NetBox running.
+- You should have Confluence up and running.
+- You should have MultiExcerpt macro plugin for Confluence installed.
+
+> ##### *NOTE: Don't forget to run NetBox rqworker.*
 
 ## Configuration
 
@@ -49,3 +55,11 @@ CONFLUENCE_CREDENTIALS = {
 
 SPACE_KEY = 'NETBOX'
 ```
+
+**Configure NetBox webhook.**
+![Alt text](deploy/docs/netbox_config.png?raw=true "Optional Title")
+
+- Choose appropriate `Object types` for the models/pages that you want to be synchronized with Confluence Wiki.
+- Tick `Type create` or/and `Type update` when you want the synchronization to happen. Typically you should tick both.
+- Fill `URL:` field with the endpoint where django_netbox_confluence runs. Example: `http://localhost:5000/netbox-wiki-api/model_change_trigger/`
+- Don't forget to tick the `Enable` checkbox to enable the webhook.

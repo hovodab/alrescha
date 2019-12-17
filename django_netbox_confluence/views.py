@@ -1,6 +1,8 @@
 import json
 
 from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 
 from django_netbox_confluence.updater.wiki_updater import WikiPageUpdater, WikiUpdateException
@@ -11,6 +13,10 @@ class NetBoxVikiAPIView(View):
     Base for all NetBox webhook handlers.
     """
     http_method_names = ['post']
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def serialize_data(self, request):
         """
