@@ -46,6 +46,8 @@ DNC_CONFLUENCE_CREDENTIALS = {
 }
 
 DNC_SPACE_KEY = 'NETBOX'
+
+DNC_WEBHOOK_TOKEN = "<SECRET_KEY>"
 ```
 > ##### *NOTE: If the space doesn't exist it will be created automatically when the first webhook fires.*
 
