@@ -90,7 +90,7 @@ class TextLinkedField(AbstractLinkedField):
 
 class StatusLinkedField(AbstractLinkedField):
     """
-    Represents text field which should be updated on Wiki.
+    Represents dropdown field which should be updated on Wiki.
     """
     verbose_name = "Drop down field."
 
