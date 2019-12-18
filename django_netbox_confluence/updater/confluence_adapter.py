@@ -2,9 +2,9 @@ import uuid
 
 from lxml import etree
 from atlassian import Confluence
+
 from django_netbox_confluence.updater.exceptioins import WikiUpdateException
 from django.template.loader import render_to_string
-from django.conf import settings
 
 
 class ConfluenceAdapter(object):
@@ -20,14 +20,27 @@ class ConfluenceAdapter(object):
         "at": "http://atlassian.com/template",
     }
 
-    def __init__(self):
-        self.confluence = Confluence(url=settings.DNC_CONFLUENCE_CREDENTIALS['url'],
-                                     username=settings.DNC_CONFLUENCE_CREDENTIALS['username'],
-                                     password=settings.DNC_CONFLUENCE_CREDENTIALS['password'])
+    def __init__(self, url, username, password, space_key):
+        self.confluence = Confluence(url=url, username=username, password=password)
+        self.space_key = space_key
+        self.get_space_or_create()
 
-    def get_page_content(self, page_title):
+    def get_space_or_create(self):
         """
-        Get page content.
+        Check whether space exists or not. If it doesn't, then create the space.
+        """
+        space = self.confluence.get_space(self.space_key)
+        if type(space) is not dict:
+            raise WikiUpdateException("Can't retrieve valid information about Confluence space."
+                                      " Please check configurations. Data: {}".format(space))
+
+        if space.get('statusCode', None) == 404:
+            space = self.confluence.create_space(self.space_key, self.space_key)
+        return space
+
+    def get_page_or_create(self, page_title):
+        """
+        Get page content, if no such page then create it.
 
         :type page_title: str
         :param page_title: Title of the page which should be retrieved.
@@ -38,7 +51,7 @@ class ConfluenceAdapter(object):
         :returns: Tuple where first element is the id of the page. The second is the parsed content data.
         """
         data = self.confluence.get_page_by_title(title=page_title,
-                                                 space=settings.DNC_SPACE_KEY,
+                                                 space=self.space_key,
                                                  expand="body.storage,version")
         if not data:
             # No such page exist. Then create such page.
@@ -66,7 +79,7 @@ class ConfluenceAdapter(object):
         :rtype: dict
         :return: Data of newly created page.
         """
-        data = self.confluence.create_page(settings.DNC_SPACE_KEY, page_title, body="")
+        data = self.confluence.create_page(self.space_key, page_title, body="")
         if not data or 'id' not in data:
             raise WikiUpdateException("Page `{}` could not be created. Response data: {}".format(page_title, data))
         return data

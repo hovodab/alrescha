@@ -1,4 +1,5 @@
-from django_netbox_confluence.updater import linked_fields
+from django.conf import settings
+
 from django_netbox_confluence.updater.confluence_adapter import ConfluenceAdapter
 from django_netbox_confluence.updater.exceptioins import WikiUpdateException
 from django_netbox_confluence.models import NetBoxConfluenceField
@@ -13,7 +14,17 @@ class WikiPageUpdater(object):
         self.model_name = data['model']
         self.data = data
         self.page_title = self.generate_page_name(self.model_name)
-        self.confluence = ConfluenceAdapter()
+
+        # Check whether settings for confluence updater exist.
+        try:
+            url = settings.DNC_CONFLUENCE_CREDENTIALS['url']
+            username = settings.DNC_CONFLUENCE_CREDENTIALS['username']
+            password = settings.DNC_CONFLUENCE_CREDENTIALS['password']
+            space_key = settings.DNC_SPACE_KEY
+        except (AttributeError, KeyError) as e:
+            raise WikiUpdateException("{}: Please check configuration in settings file.".format(e))
+
+        self.confluence = ConfluenceAdapter(url, username, password, space_key)
 
     @staticmethod
     def generate_page_name(model_name):
@@ -73,7 +84,7 @@ class WikiPageUpdater(object):
         # (Wikis old content) -> LinkedField1 -> LinkedField2 -> ... -> (Wikis new content).
         field_chain = self.get_field_chain()
 
-        page_id, page_content = self.confluence.get_page_content(self.page_title)
+        page_id, page_content = self.confluence.get_page_or_create(self.page_title)
 
         # Provide page content to each field so each will update the content with it specific way.
         for field in field_chain:

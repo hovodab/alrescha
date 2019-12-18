@@ -37,14 +37,6 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add urls configuration in your urls.py.
-```python
-urlpatterns = [
-    path('netbox-wiki-api/', include('django_netbox_confluence.urls')),
-    ...
-]
-```
-
 Add confluence credentials settings and space key where the data will be stored variables in your Django settings file.
 ```python
 DNC_CONFLUENCE_CREDENTIALS = {
@@ -55,6 +47,19 @@ DNC_CONFLUENCE_CREDENTIALS = {
 
 DNC_SPACE_KEY = 'NETBOX'
 ```
+> ##### *NOTE: If the space doesn't exist it will be created automatically when the first webhook fires.*
+
+Add urls configuration in your urls.py.
+```python
+from django.urls import incluede, path
+
+
+urlpatterns = [
+    path('netbox-wiki-api/', include('django_netbox_confluence.urls')),
+    ...
+]
+```
+
 
 **Configure NetBox webhook.**
 ![Alt text](deploy/docs/netbox_config.png?raw=true "Optional Title")
