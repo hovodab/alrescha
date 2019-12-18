@@ -28,6 +28,9 @@ class ConfluenceAdapter(object):
     def get_space_or_create(self):
         """
         Check whether space exists or not. If it doesn't, then create the space.
+
+        :rtype: dict
+        :return: Space data.
         """
         space = self.confluence.get_space(self.space_key)
         if type(space) is not dict:
