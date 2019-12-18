@@ -72,8 +72,8 @@ urlpatterns = [
 - Don't forget to tick the `Enable` checkbox to enable the webhook.
 
 **Configure djnago_netbox_confluence to process fields.**
-Now you should specify which fields(field name, is custom) should be synchronized and how(field type).
 ![Alt text](deploy/docs/dnc_config.png?raw=true "Optional Title")
+Now you should specify which fields(field name, is custom) should be synchronized and how(field type).
 
 ### Add new field types.
 If fields types that exist in admin dropdown are not enough, you can create your own fields.
