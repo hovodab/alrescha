@@ -53,7 +53,7 @@ DNC_WEBHOOK_TOKEN = "<SECRET_KEY>"
 
 Add urls configuration in your urls.py.
 ```python
-from django.urls import incluede, path
+from django.urls import include, path
 
 
 urlpatterns = [
@@ -71,6 +71,9 @@ urlpatterns = [
 - Fill `URL:` field with the endpoint where django_netbox_confluence runs. Example: `http://localhost:5000/netbox-wiki-api/model_change_trigger/`
 - Don't forget to tick the `Enable` checkbox to enable the webhook.
 
+**Configure djnago_netbox_confluence to process fields.**
+Now you should specify which fields(field name, is custom) should be synchronized and how(field type).
+![Alt text](deploy/docs/dnc_config.png?raw=true "Optional Title")
 
 ### Add new field types.
 If fields types that exist in admin dropdown are not enough, you can create your own fields.

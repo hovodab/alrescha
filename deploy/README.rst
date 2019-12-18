@@ -23,16 +23,18 @@ Quick start
 
 3. Add confluence credentials settings and space key where the data will be stored variables in your Django settings file.
 
-    DNC_CONFLUENCE_CREDENTIALS = {
-        'url': 'http://localhost:8090',
-        'username': 'admin',
-        'password': 'admin'
+  DNC_CONFLUENCE_CREDENTIALS = {
+      'url': 'http://localhost:8090',
 
-    }
+      'username': 'admin',
 
-    DNC_SPACE_KEY = 'NETBOX'
+      'password': 'admin'
 
-    DNC_WEBHOOK_TOKEN = "<SECRET_KEY>"
+  }
+
+  DNC_SPACE_KEY = 'NETBOX'
+
+  DNC_WEBHOOK_TOKEN = "<SECRET_KEY>"
 
 4. Run `python manage.py migrate` to create the Django-NetBox-Confluence models.
 
