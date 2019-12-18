@@ -123,10 +123,13 @@ STATIC_URL = '/static/'
 
 # Confluence settings and credentials, for access by REST API(encapsulated in atlassian-python-api).
 
-CONFLUENCE_CREDENTIALS = {
+DNC_CONFLUENCE_CREDENTIALS = {
     'url': 'http://localhost:8090',
     'username': 'admin',
     'password': 'admin'
 }
 
-SPACE_KEY = 'SNOW'
+DNC_SPACE_KEY = 'SNOW'
+
+DNC_FIELD_TYPES_MODULES = [
+]

@@ -44,17 +44,23 @@ class ModelChangeTriggerView(NetBoxVikiAPIView):
     Webhook handler.
     """
     def post(self, request):
-        # Take data form NetBox webhook payload.
-        data = self.serialize_data(request)
-        self.validate_data(data)
+        # Take data form NetBox webhook payload and validate format.
+        try:
+            data = self.serialize_data(request)
+            self.validate_data(data)
+        except (json.JSONDecodeError, AssertionError) as e:
+            return JsonResponse({
+                "message": "Invalid input.",
+                "error": str(e),
+            }, status=400)
 
         # TODO: Handle in queue.
         try:
             WikiPageUpdater(data).update()
-        except WikiPageUpdater as e:
+        except WikiUpdateException as e:
             return JsonResponse({
                 "message": "Update failed.",
-                "error": e,
+                "error": str(e),
             }, status=400)
 
         return JsonResponse({

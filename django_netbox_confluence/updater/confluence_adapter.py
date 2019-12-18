@@ -21,9 +21,9 @@ class ConfluenceAdapter(object):
     }
 
     def __init__(self):
-        self.confluence = Confluence(url=settings.CONFLUENCE_CREDENTIALS['url'],
-                                     username=settings.CONFLUENCE_CREDENTIALS['username'],
-                                     password=settings.CONFLUENCE_CREDENTIALS['password'])
+        self.confluence = Confluence(url=settings.DNC_CONFLUENCE_CREDENTIALS['url'],
+                                     username=settings.DNC_CONFLUENCE_CREDENTIALS['username'],
+                                     password=settings.DNC_CONFLUENCE_CREDENTIALS['password'])
 
     def get_page_content(self, page_title):
         """
@@ -38,7 +38,7 @@ class ConfluenceAdapter(object):
         :returns: Tuple where first element is the id of the page. The second is the parsed content data.
         """
         data = self.confluence.get_page_by_title(title=page_title,
-                                                 space=settings.SPACE_KEY,
+                                                 space=settings.DNC_SPACE_KEY,
                                                  expand="body.storage,version")
         if not data:
             # No such page exist. Then create such page.
@@ -66,7 +66,7 @@ class ConfluenceAdapter(object):
         :rtype: dict
         :return: Data of newly created page.
         """
-        data = self.confluence.create_page(settings.SPACE_KEY, page_title, body="")
+        data = self.confluence.create_page(settings.DNC_SPACE_KEY, page_title, body="")
         if not data or 'id' not in data:
             raise WikiUpdateException("Page `{}` could not be created. Response data: {}".format(page_title, data))
         return data
