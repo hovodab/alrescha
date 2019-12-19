@@ -99,7 +99,7 @@ DNC_FIELD_TYPES_MODULES = [
 ]
 ```
 
-Migrate changes so the new fields appears in Django admin form.
+Migrate changes so the new fields appear in Django admin form.
 ```bash
 $ python manage.py makemigratoins
 $ python manage.py migrate
