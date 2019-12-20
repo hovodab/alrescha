@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 
 from django_netbox_confluence.updater.wiki_updater import WikiPageUpdater, WikiUpdateException
-from django_netbox_confluence.updater.exceptioins import AuthorizationException
+from django_netbox_confluence.auth import authentication_required
 
 
 class NetBoxVikiAPIView(View):
@@ -48,44 +48,18 @@ class NetBoxVikiAPIView(View):
         assert "data" in data, "No `data` in webhook payload."
         assert type(data["data"]) is dict, "`data` should be dict, got {}".format(type(data["data"]))
 
-        assert "custom_fields" in data["data"], "No `cusom_fields` in webhook payload data."
+        assert "custom_fields" in data["data"], "No `custom_fields` in webhook payload data."
         assert type(data["data"]["custom_fields"]) is dict, ("`custom_fields` should be dict, got {}"
                                                              .format(type(data["data"]["custom_fields"])))
-
-    def check_token(self, request):
-        """
-        Check whether authorization token is correctly provided or not.
-
-        :raises: WikiUpdateException
-        :raises: AuthorizationException
-
-        :rtype: void
-        :return: void
-        """
-        try:
-            token = settings.DNC_WEBHOOK_TOKEN
-        except AttributeError:
-            raise WikiUpdateException("Can't find `DNC_WEBHOOK_TOKEN` in settings file. Please check. ")
-
-        if request.META.get('HTTP_AUTHORIZATION', None) != "Token {}".format(settings.DNC_WEBHOOK_TOKEN):
-            raise AuthorizationException("Wrong authorizatoin token."
-                                         " Please check your Netbox admin settings `Additional headers:`.")
 
 
 class ModelChangeTriggerView(NetBoxVikiAPIView):
     """
     Webhook handler.
     """
-    def post(self, request):
-        # TODO: Change authentication system.
-        try:
-            self.check_token(request)
-        except (AuthorizationException, WikiUpdateException) as e:
-            return JsonResponse({
-                "message": "Unauthorized access.",
-                "error": str(e),
-            }, status=401)
 
+    @authentication_required
+    def post(self, request):
         # Take data form NetBox webhook payload and validate format.
         try:
             data = self.serialize_data(request)
